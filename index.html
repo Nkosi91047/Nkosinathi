@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Happy Birthday, Bae! 🎂💖</title>
   <meta name="description" content="A tiny birthday website full of love." />
-  <link rel="preload" as="audio" href="assets/song.mp3" />
   <style>
     :root{
       --bg: #0f0f14;
@@ -174,7 +173,7 @@
     /* Canvas confetti */
     #confetti{position:fixed; inset:0; pointer-events:none; z-index:500}
 
-    /* Intro overlay – helps with autoplay on mobile */
+    /* Intro overlay */
     .overlay{
       position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
       background: radial-gradient(1200px 700px at 50% 20%, rgba(255,255,255,.08), rgba(0,0,0,.9));
@@ -192,12 +191,12 @@
 
   <!-- Hearts (spawned by JS) -->
 
-  <!-- Intro overlay to capture first tap/click for audio autoplay -->
+  <!-- Intro overlay -->
   <div class="overlay" id="overlay">
     <div class="panel">
       <span class="badge">Birthday Surprise</span>
       <h2>Tap to start the magic ✨</h2>
-      <p>We turned on the sparkles and music just for you.</p>
+      <p>We turned on the sparkles just for you.</p>
       <button class="btn" id="startBtn">Let’s go 🎉</button>
     </div>
   </div>
@@ -276,64 +275,40 @@ Torna-se audaz e sabio. You're a beautiful soul...Feliz anivesario papi. Breath 
     <button class="nav next" id="lbNext" aria-label="Next">▶</button>
   </div>
 
-  <!-- Sticky audio control -->
+  <!-- Placeholder: Sticky audio control (hidden by default, structure kept) -->
   <div class="audio-ctrl" id="audioCtrl" hidden>
     <button class="btn" id="playPause">⏸ Pause</button>
     <span id="nowPlaying">Now playing: Your Song 💿</span>
   </div>
 
-  <!-- Audio -->
+  <!-- Placeholder: Audio element (you can replace src when needed) -->
   <audio id="bgm" preload="auto" loop>
-    <!-- Put your MP3 at assets/song.mp3 -->
     <source src="assets/song.mp3" type="audio/mpeg" />
     Your browser does not support the audio element.
   </audio>
 
   <script>
     /************ CONFIG – edit these ************/
-    const BIRTHDAY_NAME = "Bae";       // display name
-    // Tomorrow from now (site is for Aug 24, 2025)
-    const TARGET_DATE = new Date("2025-08-24T00:00:00"); // change time if you want!
-    const SONG_TITLE   = "A Girl Like You – Kevon Edmonds"; // or your track
+    const BIRTHDAY_NAME = "Bae";
+    const TARGET_DATE = new Date("2025-08-24T00:00:00");
     /*********************************************/
 
     // Fill text
     document.getElementById('forName').textContent  = BIRTHDAY_NAME;
     document.getElementById('heroName').textContent = BIRTHDAY_NAME;
     document.getElementById('noteName').textContent = BIRTHDAY_NAME;
-    document.getElementById('nowPlaying').textContent = "Now playing: " + SONG_TITLE;
 
     // Pretty date label for header
     document.getElementById('birthdayDate').textContent =
       TARGET_DATE.toLocaleDateString(undefined, {month:"short", day:"numeric"});
 
-    /* Autoplay helper: require first user gesture */
+    /* Overlay handler */
     const overlay = document.getElementById('overlay');
     const startBtn = document.getElementById('startBtn');
-    const audio = document.getElementById('bgm');
-    const audioCtrl = document.getElementById('audioCtrl');
-    const playPause = document.getElementById('playPause');
 
     startBtn.addEventListener('click', async () => {
       overlay.style.display = 'none';
-      audioCtrl.hidden = false;
-      try {
-        await audio.play();
-        playPause.textContent = "⏸ Pause";
-      } catch(e){
-        // If autoplay still blocked, leave button to play
-        playPause.textContent = "▶️ Play";
-      }
       burstConfetti();
-    });
-
-    playPause.addEventListener('click', async () => {
-      if(audio.paused){
-        try { await audio.play(); playPause.textContent = "⏸ Pause"; }
-        catch(e){ playPause.textContent = "▶️ Play"; }
-      } else {
-        audio.pause(); playPause.textContent = "▶️ Play";
-      }
     });
 
     // Smooth scroll to gallery
@@ -357,116 +332,4 @@ Torna-se audaz e sabio. You're a beautiful soul...Feliz anivesario papi. Breath 
       const h = Math.floor(diff/1000/60/60)%24;
       const d = Math.floor(diff/1000/60/60/24);
       cdEls.d.textContent = d;
-      cdEls.h.textContent = h.toString().padStart(2,'0');
-      cdEls.m.textContent = m.toString().padStart(2,'0');
-      cdEls.s.textContent = s.toString().padStart(2,'0');
-    }
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-
-    // Hearts spawner
-    function spawnHeart(){
-      const el = document.createElement('div');
-      el.className = 'heart';
-      const size = 14 + Math.random()*22;
-      el.style.width = size+'px'; el.style.height = size+'px';
-      el.style.left = Math.random()*100 + 'vw';
-      el.style.animationDuration = (6 + Math.random()*6) + 's';
-      el.style.opacity = (0.35 + Math.random()*0.5);
-      document.body.appendChild(el);
-      setTimeout(()=> el.remove(), 12000);
-    }
-    setInterval(spawnHeart, 700);
-
-    // Lightbox
-    const galleryImgs = [...document.querySelectorAll('.gallery img')];
-    const lb = document.getElementById('lightbox');
-    const lbImg = document.getElementById('lbImg');
-    const lbClose = document.getElementById('lbClose');
-    const lbPrev = document.getElementById('lbPrev');
-    const lbNext = document.getElementById('lbNext');
-    let currentIndex = 0;
-
-    function openLightbox(idx){
-      currentIndex = idx;
-      lbImg.src = galleryImgs[idx].src;
-      lb.classList.add('show');
-      lb.setAttribute('aria-hidden','false');
-    }
-    function closeLightbox(){
-      lb.classList.remove('show');
-      lb.setAttribute('aria-hidden','true');
-    }
-    function nav(delta){
-      currentIndex = (currentIndex + delta + galleryImgs.length) % galleryImgs.length;
-      lbImg.src = galleryImgs[currentIndex].src;
-    }
-    galleryImgs.forEach(img=>{
-      img.addEventListener('click', () => openLightbox(parseInt(img.dataset.index, 10)));
-    });
-    lbClose.addEventListener('click', closeLightbox);
-    lbPrev.addEventListener('click', ()=>nav(-1));
-    lbNext.addEventListener('click', ()=>nav(1));
-    lb.addEventListener('click', (e)=>{ if(e.target===lb) closeLightbox(); });
-    window.addEventListener('keydown', (e)=>{
-      if(!lb.classList.contains('show')) return;
-      if(e.key==='Escape') closeLightbox();
-      if(e.key==='ArrowLeft') nav(-1);
-      if(e.key==='ArrowRight') nav(1);
-    });
-
-    // Confetti (tiny, no libs)
-    const canvas = document.getElementById('confetti');
-    const ctx = canvas.getContext('2d');
-    let W, H, confetti = [];
-    function resize(){
-      W = canvas.width = innerWidth;
-      H = canvas.height = innerHeight;
-    }
-    addEventListener('resize', resize); resize();
-
-    function addConfetti(n=160){
-      for(let i=0;i<n;i++){
-        confetti.push({
-          x: Math.random()*W,
-          y: -10,
-          r: 4+Math.random()*6,
-          c: `hsl(${Math.random()*360}, 90%, 60%)`,
-          v: 1+Math.random()*3,
-          a: Math.random()*Math.PI
-        });
-      }
-    }
-    function draw(){
-      ctx.clearRect(0,0,W,H);
-      confetti.forEach(p=>{
-        p.a += 0.05;
-        p.y += p.v;
-        p.x += Math.sin(p.a);
-        ctx.fillStyle = p.c;
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-        ctx.fill();
-      });
-      confetti = confetti.filter(p => p.y < H+12);
-      requestAnimationFrame(draw);
-    }
-    draw();
-
-    function burstConfetti(){
-      addConfetti(200);
-      // second wave
-      setTimeout(()=>addConfetti(160), 250);
-      setTimeout(()=>addConfetti(160), 500);
-    }
-    document.getElementById('celebrateBtn').addEventListener('click', burstConfetti);
-
-    // Accessibility: reduce motion respect
-    const mediaQuery = matchMedia('(prefers-reduced-motion: reduce)');
-    if (mediaQuery.matches) {
-      // Slow hearts & fewer confetti when reduction is requested
-      clearInterval(); // noop but shows intent; we keep hearts slow via interval above
-    }
-  </script>
-</body>
-</html>
+      cdEls.h.textContent = h.toString().padStart(2
